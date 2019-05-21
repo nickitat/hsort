@@ -4,46 +4,23 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iostream>
 
 namespace hsort {
 
 namespace detail {
 template <class SeqRandomIt, class OrdRandomIt>
 void apply_order(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
-  // testing::ScopedTimer timer(testing::ScopedTimer::ApplyOrder);
-
-  for (auto current = ofirst; current != olast; ++current) {
-    // auto current = it;
-    const auto target = std::distance(ofirst, current);
-    // std::cout << "target: " << target << std::endl;
-    while (*current != target) {
-      // std::cout << *current << std::endl;
-      // auto& me = *(first + (current - ofirst));
-      // auto& cur = *(first + *current);
-      // auto& nxt = *(first + *(ofirst + *current));
-
-      // using std::swap;
-      // std::cout << cur << " " << nxt << std::endl;
-      // swap(cur, nxt);
-      // std::cout << cur << " " << nxt << std::endl;
-      // swap(cur.index, nxt.index);
-      // std::cout << cur << " " << nxt << std::endl;
-      // swap(cur.index, me.index);
-      // std::cout << cur << " " << nxt << std::endl << std::endl;
-      // current = ofirst + me.index;
-
-      auto next = ofirst + *current;
-      int me = current - ofirst;
-      int cur = *current;
-      int nxt = *next;
+  const auto size = std::distance(ofirst, olast);
+  for (auto i = 0; i < size; ++i) {
+    auto& me = *(first + i);
+    while (me.index != i) {
+      auto& cur = *(first + me.index);
+      auto& nxt = *(first + cur.index);
       using std::swap;
-      // std::cout << *(first + cur) << " " << *(first + nxt) << std::endl;
-      swap(*(first + cur), *(first + nxt));
-      // std::cout << *(first + cur) << " " << *(first + nxt) << std::endl;
-      swap((first + cur)->index, (first + nxt)->index);
-      // std::cout << *(first + cur) << " " << *(first + nxt) << std::endl;
-      swap((first + cur)->index, (first + me)->index);
-      // std::cout << *(first + cur) << " " << *(first + nxt) << std::endl;
+      swap(cur, nxt);
+      swap(cur.index, nxt.index);
+      swap(cur.index, me.index);
     }
   }
 }

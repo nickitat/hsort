@@ -51,7 +51,7 @@ static void SortHeavy(benchmark::State& state) {
     state.PauseTiming();
     ShuffleContainer(container);
     state.ResumeTiming();
-    sort_heavy(container.begin(), container.end(), comparator);
+    hsort::sort_heavy(container.begin(), container.end(), comparator);
   }
 }
 BENCHMARK(SortHeavy)
@@ -108,6 +108,7 @@ static void BoostSpinSort(benchmark::State& state) {
     state.PauseTiming();
     ShuffleContainer(container);
     state.ResumeTiming();
+
     boost::sort::spinsort(container.begin(), container.end(), comparator);
   }
 }

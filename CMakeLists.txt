@@ -14,19 +14,43 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/hsort.hpp DESTINATION include/hsort/)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/detail/iterator_wrapper.hpp
         DESTINATION include/hsort/detail)
 
+set(additional_libs profiler) # from gperftools
+set(additional_compiler_flags -std=c++11 -g -O2)
+
 if(NICKITAT_HSORT_WITH_TESTS)
   add_executable(nickitat_hsort_tests test/test.cpp)
-  target_link_libraries(nickitat_hsort_tests nickitat_hsort)
-  target_compile_options(nickitat_hsort_tests PRIVATE -std=c++11)
+  target_link_libraries(nickitat_hsort_tests nickitat_hsort ${additional_libs})
+  target_compile_options(nickitat_hsort_tests
+                         PRIVATE ${additional_compiler_flags})
+
+  if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    add_custom_command(TARGET nickitat_hsort_tests POST_BUILD
+                       COMMAND dsymutil ${CMAKE_BINARY_DIR}/nickitat_hsort_tests
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                       COMMENT "Running dsymutil on nickitat_hsort_tests...")
+  endif()
 endif()
 
 if(NICKITAT_HSORT_WITH_BENCHMARKS)
-  add_executable(nickitat_hsort_benchmarks benchmark/gbench.cpp)
-  target_link_libraries(nickitat_hsort_benchmarks
+  add_executable(nickitat_hsort_gbench_full benchmark/gbench_full.cpp)
+  target_link_libraries(nickitat_hsort_gbench_full
                         nickitat_hsort
                         benchmark
-                        benchmark_main)
-  target_compile_options(nickitat_hsort_benchmarks PRIVATE -std=c++11 -O2)
+                        benchmark_main
+                        ${additional_libs})
+  target_compile_options(nickitat_hsort_gbench_full
+                         PRIVATE ${additional_compiler_flags})
+  set(to_collect_debug_info ${to_collect_debug_info} nickitat_hsort_gbench_full)
+
+  add_executable(nickitat_hsort_gbench_random benchmark/gbench_random.cpp)
+  target_link_libraries(nickitat_hsort_gbench_random
+                        nickitat_hsort
+                        benchmark
+                        benchmark_main
+                        ${additional_libs})
+  target_compile_options(nickitat_hsort_gbench_random
+                         PRIVATE ${additional_compiler_flags})
+  set(to_collect_debug_info ${to_collect_debug_info} nickitat_hsort_gbench_full)
 endif()
 
 # I'm currently using the following script: cmake . -Bbuild

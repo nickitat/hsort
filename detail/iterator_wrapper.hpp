@@ -8,7 +8,7 @@ namespace hsort {
 namespace detail {
 
 template <class _RandomIt>
-class iter_wrapper : public _RandomIt {
+class iter_wrapper {
  public:
   using iterator_category = std::random_access_iterator_tag;
   using value_type = std::size_t;
@@ -23,53 +23,91 @@ class iter_wrapper : public _RandomIt {
           std::random_access_iterator_tag>::value,
       "iter_wrapper should be a random access iterator.");
 
-  iter_wrapper(_RandomIt it) : _RandomIt(it) {
+  explicit iter_wrapper(_RandomIt it) : m_it(it) {
   }
 
   iter_wrapper& operator--() {
-    _RandomIt::operator--();
+    --m_it;
     return *this;
   }
 
-  iter_wrapper operator--(int) {
-    return _RandomIt::operator--(0);
+  iter_wrapper operator--(int) const {
+    return iter_wrapper{m_it--};
   }
 
   iter_wrapper& operator++() {
-    _RandomIt::operator++();
+    ++m_it;
     return *this;
   }
 
-  iter_wrapper operator++(int) {
-    return _RandomIt::operator++(0);
+  iter_wrapper operator++(int) const {
+    return iter_wrapper{m_it++};
   }
 
   iter_wrapper operator+(int n) const {
-    return _RandomIt::operator+(n);
+    return iter_wrapper{m_it + n};
   }
 
   iter_wrapper& operator+=(int n) {
-    _RandomIt::operator+=(n);
+    m_it += n;
     return *this;
   }
 
   iter_wrapper operator-(int n) const {
-    return _RandomIt::operator-(n);
+    return iter_wrapper{m_it - n};
   }
 
   iter_wrapper& operator-=(int n) {
-    _RandomIt::operator-=(n);
+    m_it -= n;
     return *this;
   }
 
-  value_type& operator*() const {
-    return (_RandomIt::operator*()).index;
+  value_type& operator*() {
+    return m_it->index;
   }
+
+  const value_type& operator*() const {
+    return m_it->index;
+  }
+
+  //  private:
+  _RandomIt m_it;
 };
+
+template <class It>
+typename It::difference_type operator-(const iter_wrapper<It>& lhs,
+                                       const iter_wrapper<It>& rhs) {
+  return lhs.m_it - rhs.m_it;
+}
+
+template <class It>
+bool operator==(const iter_wrapper<It>& lhs, const iter_wrapper<It>& rhs) {
+  return lhs.m_it == rhs.m_it;
+}
+
+template <class It>
+bool operator!=(const iter_wrapper<It>& lhs, const iter_wrapper<It>& rhs) {
+  return lhs.m_it != rhs.m_it;
+}
+
+template <class It>
+bool operator<(const iter_wrapper<It>& lhs, const iter_wrapper<It>& rhs) {
+  return lhs.m_it < rhs.m_it;
+}
+
+template <class It>
+bool operator>(const iter_wrapper<It>& lhs, const iter_wrapper<It>& rhs) {
+  return lhs.m_it > rhs.m_it;
+}
+
+template <class It>
+bool operator>=(const iter_wrapper<It>& lhs, const iter_wrapper<It>& rhs) {
+  return lhs.m_it >= rhs.m_it;
+}
 
 template <class RandomIt>
 iter_wrapper<RandomIt> wrap(RandomIt it) {
-  return {it};
+  return iter_wrapper<RandomIt>{it};
 }
 
 }  // namespace detail
