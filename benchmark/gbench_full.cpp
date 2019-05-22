@@ -17,6 +17,8 @@
 #include <boost/sort/spinsort/spinsort.hpp>
 
 namespace {
+static constexpr std::size_t SIZE = 9;
+
 struct X : hsort::hsort_base {
   int key;
   int data[16];
@@ -25,160 +27,73 @@ struct X : hsort::hsort_base {
   }
 };
 
-std::vector<X> PrepareInputContainer(std::size_t size) {
-  std::vector<X> input;
-  for (std::size_t i = 0; i < size; ++i) {
-    input.emplace_back(i /*index*/, i /*key*/);
+struct Compare {
+  bool operator()(const X& lhs, const X& rhs) const {
+    return lhs.key < rhs.key;
   }
-  return input;
-}
-
-void ShuffleContainer(std::vector<X>& container) {
-  std::random_device rd;
-  std::mt19937 g(rd());
-  std::shuffle(container.begin(), container.end(), g);
-}
+};
 }  // namespace
 
-static void SortHeavy(benchmark::State& state) {
+template <class SortAlgo>
+void BM_SortAllPermutations(benchmark::State& state, SortAlgo sort) {
   for (auto _ : state) {
-    static constexpr std::size_t size = 9;
     std::vector<X> input;
-    for (std::size_t i = 0; i < size; ++i) {
+    for (std::size_t i = 0; i < SIZE; ++i) {
       input.emplace_back(/*index*/ i, /*key*/ i);
     }
 
-    auto comparator = [](const X& lhs, const X& rhs) {
-      return lhs.key < rhs.key;
-    };
-
     do {
       auto inputCopy = input;
-      hsort::sort_heavy(inputCopy.begin(), inputCopy.end(), comparator);
-      assert(std::is_sorted(inputCopy.begin(), inputCopy.end(), comparator));
-    } while (std::next_permutation(input.begin(), input.end(), comparator));
+      sort(inputCopy.begin(), inputCopy.end(), Compare());
+    } while (std::next_permutation(input.begin(), input.end(), Compare()));
   }
 }
-BENCHMARK(SortHeavy)->Repetitions(10)->ReportAggregatesOnly();
 
-static void StdSort(benchmark::State& state) {
-  for (auto _ : state) {
-    static constexpr std::size_t size = 9;
-    std::vector<X> input;
-    for (std::size_t i = 0; i < size; ++i) {
-      input.emplace_back(/*index*/ i, /*key*/ i);
-    }
+void (*fp)(std::vector<X>::iterator,
+           std::vector<X>::iterator,
+           Compare) = &std::sort;
+BENCHMARK_CAPTURE(BM_SortAllPermutations,
+                  std_sort_tag,
+                  (decltype(*fp))std::sort<std::vector<X>::iterator, Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
 
-    auto comparator = [](const X& lhs, const X& rhs) {
-      return lhs.key < rhs.key;
-    };
+BENCHMARK_CAPTURE(BM_SortAllPermutations,
+                  sort_heavy_tag,
+                  hsort::sort_heavy<std::vector<X>::iterator, Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
 
-    do {
-      auto inputCopy = input;
-      std::sort(inputCopy.begin(), inputCopy.end(), comparator);
-      assert(std::is_sorted(inputCopy.begin(), inputCopy.end(), comparator));
-    } while (std::next_permutation(input.begin(), input.end(), comparator));
-  }
-}
-BENCHMARK(StdSort)->Repetitions(10)->ReportAggregatesOnly();
-
-// static void BoostPdqSort(benchmark::State& state) {
-//   auto comparator = [](const X& lhs, const X& rhs) {
-//     return lhs.key < rhs.key;
-//   };
-
-//   const auto size = state.range(0);
-//   auto container = PrepareInputContainer(size);
-//   for (auto _ : state) {
-//     state.PauseTiming();
-//     ShuffleContainer(container);
-//     state.ResumeTiming();
-//     boost::sort::pdqsort(container.begin(), container.end(), comparator);
-//   }
-// }
-// BENCHMARK(BoostPdqSort)
-//     ->Arg(100)
-//     // ->Repetitions(10)
+// BENCHMARK_CAPTURE(BM_SortAllPermutations,
+//                   boost_pdq_tag,
+//                   boost::sort::pdqsort<std::vector<X>::iterator, Compare>)
+//     ->Repetitions(10)
 //     ->ReportAggregatesOnly();
 
-// static void BoostSpinSort(benchmark::State& state) {
-//   auto comparator = [](const X& lhs, const X& rhs) {
-//     return lhs.key < rhs.key;
-//   };
-
-//   const auto size = state.range(0);
-//   auto container = PrepareInputContainer(size);
-//   for (auto _ : state) {
-//     state.PauseTiming();
-//     ShuffleContainer(container);
-//     state.ResumeTiming();
-//     boost::sort::spinsort(container.begin(), container.end(), comparator);
-//   }
-// }
-// BENCHMARK(BoostSpinSort)
-//     ->Arg(100)
-//     // ->Repetitions(10)
+// BENCHMARK_CAPTURE(BM_SortAllPermutations,
+//                   boost_spin_tag,
+//                   boost::sort::spinsort<std::vector<X>::iterator, Compare>)
+//     ->Repetitions(10)
 //     ->ReportAggregatesOnly();
 
-static void IndirBoostSpinSort(benchmark::State& state) {
-  for (auto _ : state) {
-    static constexpr std::size_t size = 9;
-    std::vector<X> input;
-    for (std::size_t i = 0; i < size; ++i) {
-      input.emplace_back(/*index*/ i, /*key*/ i);
-    }
+BENCHMARK_CAPTURE(
+    BM_SortAllPermutations,
+    boost_iss_tag,
+    boost::sort::indirect_spinsort<std::vector<X>::iterator, Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
 
-    auto comparator = [](const X& lhs, const X& rhs) {
-      return lhs.key < rhs.key;
-    };
-
-    do {
-      auto inputCopy = input;
-      boost::sort::indirect_spinsort(inputCopy.begin(), inputCopy.end(),
-                                     comparator);
-      assert(std::is_sorted(inputCopy.begin(), inputCopy.end(), comparator));
-    } while (std::next_permutation(input.begin(), input.end(), comparator));
-  }
-}
-BENCHMARK(IndirBoostSpinSort)->Repetitions(10)->ReportAggregatesOnly();
-
-// static void BoostFlatStableSort(benchmark::State& state) {
-//   auto comparator = [](const X& lhs, const X& rhs) {
-//     return lhs.key < rhs.key;
-//   };
-
-//   const auto size = state.range(0);
-//   auto container = PrepareInputContainer(size);
-//   for (auto _ : state) {
-//     state.PauseTiming();
-//     ShuffleContainer(container);
-//     state.ResumeTiming();
-//     boost::sort::flat_stable_sort(container.begin(), container.end(),
-//                                   comparator);
-//   }
-// }
-// BENCHMARK(BoostFlatStableSort)
-//     ->Arg(100)
-//     // ->Repetitions(10)
+// BENCHMARK_CAPTURE(
+//     BM_SortAllPermutations,
+//     boost_flat_tag,
+//     boost::sort::flat_stable_sort<std::vector<X>::iterator, Compare>)
+//     ->Repetitions(10)
 //     ->ReportAggregatesOnly();
 
-// static void IndirBoostFlatStableSort(benchmark::State& state) {
-//   auto comparator = [](const X& lhs, const X& rhs) {
-//     return lhs.key < rhs.key;
-//   };
-
-//   const auto size = state.range(0);
-//   auto container = PrepareInputContainer(size);
-//   for (auto _ : state) {
-//     state.PauseTiming();
-//     ShuffleContainer(container);
-//     state.ResumeTiming();
-//     boost::sort::indirect_flat_stable_sort(container.begin(),
-//     container.end(),
-//                                            comparator);
-//   }
-// }
-// BENCHMARK(IndirBoostFlatStableSort)
-//     ->Arg(100)
-//     // ->Repetitions(10)
+// BENCHMARK_CAPTURE(
+//     BM_SortAllPermutations,
+//     boost_ifs_tag,
+//     boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator,
+//     Compare>)
+//     ->Repetitions(10)
 //     ->ReportAggregatesOnly();

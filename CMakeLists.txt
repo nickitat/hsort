@@ -40,7 +40,6 @@ if(NICKITAT_HSORT_WITH_BENCHMARKS)
                         ${additional_libs})
   target_compile_options(nickitat_hsort_gbench_full
                          PRIVATE ${additional_compiler_flags})
-  set(to_collect_debug_info ${to_collect_debug_info} nickitat_hsort_gbench_full)
 
   add_executable(nickitat_hsort_gbench_random benchmark/gbench_random.cpp)
   target_link_libraries(nickitat_hsort_gbench_random
@@ -50,7 +49,14 @@ if(NICKITAT_HSORT_WITH_BENCHMARKS)
                         ${additional_libs})
   target_compile_options(nickitat_hsort_gbench_random
                          PRIVATE ${additional_compiler_flags})
-  set(to_collect_debug_info ${to_collect_debug_info} nickitat_hsort_gbench_full)
+
+  if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    add_custom_command(
+      TARGET nickitat_hsort_gbench_random POST_BUILD
+      COMMAND dsymutil ${CMAKE_BINARY_DIR}/nickitat_hsort_gbench_random
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMENT "Running dsymutil on nickitat_hsort_gbench_random...")
+  endif()
 endif()
 
 # I'm currently using the following script: cmake . -Bbuild

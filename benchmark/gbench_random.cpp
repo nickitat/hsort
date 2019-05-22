@@ -2,6 +2,8 @@
 
 #include <benchmark/benchmark.h>
 
+#include <gperftools/profiler.h>
+
 #include <algorithm>
 #include <chrono>
 #include <iostream>
@@ -17,6 +19,18 @@
 #include <boost/sort/spinsort/spinsort.hpp>
 
 namespace {
+static constexpr std::size_t SIZE = 100;
+
+struct PerfProfilingWrapper {
+  PerfProfilingWrapper(const char* profileName) {
+    ProfilerStart(profileName);
+  }
+
+  ~PerfProfilingWrapper() {
+    ProfilerStop();
+  }
+};
+
 struct X : hsort::hsort_base {
   int key;
   int data[16];
@@ -25,154 +39,83 @@ struct X : hsort::hsort_base {
   }
 };
 
-std::vector<X> PrepareInputContainer(std::size_t size) {
-  std::vector<X> input;
-  for (std::size_t i = 0; i < size; ++i) {
-    input.emplace_back(i /*index*/, i /*key*/);
+struct Compare {
+  bool operator()(const X& lhs, const X& rhs) const {
+    return lhs.key < rhs.key;
   }
-  return input;
-}
+};
 
 void ShuffleContainer(std::vector<X>& container) {
   std::random_device rd;
   std::mt19937 g(rd());
   std::shuffle(container.begin(), container.end(), g);
 }
+
+std::vector<X> PrepareRandomInputContainer(std::size_t size) {
+  std::vector<X> input;
+  for (std::size_t i = 0; i < size; ++i) {
+    input.emplace_back(i /*index*/, i /*key*/);
+  }
+  ShuffleContainer(input);
+  return input;
+}
+
+// all the benchmark functions should have the same (random) input
+std::vector<X> GetRandomInputContainer(std::size_t size) {
+  static const auto container = PrepareRandomInputContainer(size);
+  return container;
+}
 }  // namespace
 
-static void SortHeavy(benchmark::State& state) {
-  auto comparator = [](const X& lhs, const X& rhs) {
-    return lhs.key < rhs.key;
-  };
-
-  const auto size = state.range(0);
-  auto container = PrepareInputContainer(size);
+template <class SortAlgo>
+void BM_SortRandomInput(benchmark::State& state,
+                        SortAlgo sort,
+                        const char* profileName) {
+  PerfProfilingWrapper perf(profileName);
+  const auto input = GetRandomInputContainer(SIZE);
   for (auto _ : state) {
-    state.PauseTiming();
-    ShuffleContainer(container);
-    state.ResumeTiming();
-    hsort::sort_heavy(container.begin(), container.end(), comparator);
+    auto container = input;
+    sort(container.begin(), container.end(), Compare());
   }
 }
-BENCHMARK(SortHeavy)
-    ->Arg(100)
-    // ->Repetitions(10)
-    ->ReportAggregatesOnly();
 
-static void StdSort(benchmark::State& state) {
-  auto comparator = [](const X& lhs, const X& rhs) {
-    return lhs.key < rhs.key;
-  };
+void (*fp)(std::vector<X>::iterator,
+           std::vector<X>::iterator,
+           Compare) = &std::sort;
+BENCHMARK_CAPTURE(BM_SortRandomInput,
+                  std_sort_tag,
+                  (decltype(*fp))std::sort<std::vector<X>::iterator, Compare>,
+                  "profiles/random/profile_stdsort.prof");
 
-  const auto size = state.range(0);
-  auto container = PrepareInputContainer(size);
-  for (auto _ : state) {
-    state.PauseTiming();
-    ShuffleContainer(container);
-    state.ResumeTiming();
-    std::sort(container.begin(), container.end(), comparator);
-  }
-}
-BENCHMARK(StdSort)
-    ->Arg(100)
-    // ->Repetitions(10)
-    ->ReportAggregatesOnly();
+BENCHMARK_CAPTURE(BM_SortRandomInput,
+                  sort_heavy_tag,
+                  hsort::sort_heavy<std::vector<X>::iterator, Compare>,
+                  "profiles/random/profile_sort_heavy.prof");
 
-static void BoostPdqSort(benchmark::State& state) {
-  auto comparator = [](const X& lhs, const X& rhs) {
-    return lhs.key < rhs.key;
-  };
+BENCHMARK_CAPTURE(BM_SortRandomInput,
+                  boost_pdq_tag,
+                  boost::sort::pdqsort<std::vector<X>::iterator, Compare>,
+                  "profiles/random/profile_boost_pdq.prof");
 
-  const auto size = state.range(0);
-  auto container = PrepareInputContainer(size);
-  for (auto _ : state) {
-    state.PauseTiming();
-    ShuffleContainer(container);
-    state.ResumeTiming();
-    boost::sort::pdqsort(container.begin(), container.end(), comparator);
-  }
-}
-BENCHMARK(BoostPdqSort)
-    ->Arg(100)
-    // ->Repetitions(10)
-    ->ReportAggregatesOnly();
+BENCHMARK_CAPTURE(BM_SortRandomInput,
+                  boost_spin_tag,
+                  boost::sort::spinsort<std::vector<X>::iterator, Compare>,
+                  "profiles/random/profile_boost_spin.prof");
 
-static void BoostSpinSort(benchmark::State& state) {
-  auto comparator = [](const X& lhs, const X& rhs) {
-    return lhs.key < rhs.key;
-  };
+BENCHMARK_CAPTURE(
+    BM_SortRandomInput,
+    boost_iss_tag,
+    boost::sort::indirect_spinsort<std::vector<X>::iterator, Compare>,
+    "profiles/random/profile_boost_iss.prof");
 
-  const auto size = state.range(0);
-  auto container = PrepareInputContainer(size);
-  for (auto _ : state) {
-    state.PauseTiming();
-    ShuffleContainer(container);
-    state.ResumeTiming();
+BENCHMARK_CAPTURE(
+    BM_SortRandomInput,
+    boost_flat_tag,
+    boost::sort::flat_stable_sort<std::vector<X>::iterator, Compare>,
+    "profiles/random/profile_boost_flat.prof");
 
-    boost::sort::spinsort(container.begin(), container.end(), comparator);
-  }
-}
-BENCHMARK(BoostSpinSort)
-    ->Arg(100)
-    // ->Repetitions(10)
-    ->ReportAggregatesOnly();
-
-static void IndirBoostSpinSort(benchmark::State& state) {
-  auto comparator = [](const X& lhs, const X& rhs) {
-    return lhs.key < rhs.key;
-  };
-
-  const auto size = state.range(0);
-  auto container = PrepareInputContainer(size);
-  for (auto _ : state) {
-    state.PauseTiming();
-    ShuffleContainer(container);
-    state.ResumeTiming();
-    boost::sort::indirect_spinsort(container.begin(), container.end(),
-                                   comparator);
-  }
-}
-BENCHMARK(IndirBoostSpinSort)
-    ->Arg(100)
-    // ->Repetitions(10)
-    ->ReportAggregatesOnly();
-
-static void BoostFlatStableSort(benchmark::State& state) {
-  auto comparator = [](const X& lhs, const X& rhs) {
-    return lhs.key < rhs.key;
-  };
-
-  const auto size = state.range(0);
-  auto container = PrepareInputContainer(size);
-  for (auto _ : state) {
-    state.PauseTiming();
-    ShuffleContainer(container);
-    state.ResumeTiming();
-    boost::sort::flat_stable_sort(container.begin(), container.end(),
-                                  comparator);
-  }
-}
-BENCHMARK(BoostFlatStableSort)
-    ->Arg(100)
-    // ->Repetitions(10)
-    ->ReportAggregatesOnly();
-
-static void IndirBoostFlatStableSort(benchmark::State& state) {
-  auto comparator = [](const X& lhs, const X& rhs) {
-    return lhs.key < rhs.key;
-  };
-
-  const auto size = state.range(0);
-  auto container = PrepareInputContainer(size);
-  for (auto _ : state) {
-    state.PauseTiming();
-    ShuffleContainer(container);
-    state.ResumeTiming();
-    boost::sort::indirect_flat_stable_sort(container.begin(), container.end(),
-                                           comparator);
-  }
-}
-BENCHMARK(IndirBoostFlatStableSort)
-    ->Arg(100)
-    // ->Repetitions(10)
-    ->ReportAggregatesOnly();
+BENCHMARK_CAPTURE(
+    BM_SortRandomInput,
+    boost_ifs_tag,
+    boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator, Compare>,
+    "profiles/random/profile_boost_ifs.prof");
