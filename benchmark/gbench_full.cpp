@@ -64,17 +64,17 @@ BENCHMARK_CAPTURE(BM_SortAllPermutations,
     ->Repetitions(10)
     ->ReportAggregatesOnly();
 
-// BENCHMARK_CAPTURE(BM_SortAllPermutations,
-//                   boost_pdq_tag,
-//                   boost::sort::pdqsort<std::vector<X>::iterator, Compare>)
-//     ->Repetitions(10)
-//     ->ReportAggregatesOnly();
+BENCHMARK_CAPTURE(BM_SortAllPermutations,
+                  boost_pdq_tag,
+                  boost::sort::pdqsort<std::vector<X>::iterator, Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
 
-// BENCHMARK_CAPTURE(BM_SortAllPermutations,
-//                   boost_spin_tag,
-//                   boost::sort::spinsort<std::vector<X>::iterator, Compare>)
-//     ->Repetitions(10)
-//     ->ReportAggregatesOnly();
+BENCHMARK_CAPTURE(BM_SortAllPermutations,
+                  boost_spin_tag,
+                  boost::sort::spinsort<std::vector<X>::iterator, Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
 
 BENCHMARK_CAPTURE(
     BM_SortAllPermutations,
@@ -83,17 +83,17 @@ BENCHMARK_CAPTURE(
     ->Repetitions(10)
     ->ReportAggregatesOnly();
 
-// BENCHMARK_CAPTURE(
-//     BM_SortAllPermutations,
-//     boost_flat_tag,
-//     boost::sort::flat_stable_sort<std::vector<X>::iterator, Compare>)
-//     ->Repetitions(10)
-//     ->ReportAggregatesOnly();
+BENCHMARK_CAPTURE(
+    BM_SortAllPermutations,
+    boost_flat_tag,
+    boost::sort::flat_stable_sort<std::vector<X>::iterator, Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
 
-// BENCHMARK_CAPTURE(
-//     BM_SortAllPermutations,
-//     boost_ifs_tag,
-//     boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator,
-//     Compare>)
-//     ->Repetitions(10)
-//     ->ReportAggregatesOnly();
+BENCHMARK_CAPTURE(
+    BM_SortAllPermutations,
+    boost_ifs_tag,
+    boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator,
+    Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
