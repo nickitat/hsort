@@ -15,6 +15,10 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/detail/iterator_wrapper.hpp
         DESTINATION include/hsort/detail)
 
 set(additional_libs profiler) # from gperftools
+if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+  set(additional_libs ${additional_libs} pthread)
+endif()
+
 set(additional_compiler_flags -std=c++11 -g -O2)
 
 if(NICKITAT_HSORT_WITH_TESTS)

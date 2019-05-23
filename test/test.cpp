@@ -2,6 +2,7 @@
 
 #include <gperftools/profiler.h>
 
+#include <cassert>
 #include <algorithm>
 #include <chrono>
 #include <iostream>
