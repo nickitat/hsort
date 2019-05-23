@@ -61,6 +61,15 @@ if(NICKITAT_HSORT_WITH_BENCHMARKS)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       COMMENT "Running dsymutil on nickitat_hsort_gbench_random...")
   endif()
+
+  add_executable(nickitat_hsort_cmp_with_stdsort benchmark/comparison_with_stdsort.cpp)
+  target_link_libraries(nickitat_hsort_cmp_with_stdsort
+                        nickitat_hsort
+                        benchmark
+                        benchmark_main
+                        ${additional_libs})
+  target_compile_options(nickitat_hsort_cmp_with_stdsort
+                         PRIVATE ${additional_compiler_flags})
 endif()
 
 # I'm currently using the following script: cmake . -Bbuild

@@ -23,6 +23,12 @@ struct X : hsort::hsort_base {
   friend std::ostream& operator<<(std::ostream& os, const X& x);
 };
 
+struct Compare {
+  bool operator()(const X& lhs, const X& rhs) const {
+    return lhs.key < rhs.key;
+  }
+};
+
 std::ostream& operator<<(std::ostream& os, const X& x) {
   os << x.key;
   return os;
@@ -30,21 +36,22 @@ std::ostream& operator<<(std::ostream& os, const X& x) {
 }  // namespace A
 
 int main() {
-  static constexpr std::size_t size = 9;
+  static constexpr std::size_t size = 10;
   std::vector<A::X> input;
   for (std::size_t i = 0; i < size; ++i) {
     input.emplace_back(/*index*/ i, /*key*/ i);
   }
 
-  auto comparator = [](const A::X& lhs, const A::X& rhs) {
-    return lhs.key < rhs.key;
-  };
+  ProfilerStart("profile_cmp_with_stdsort_all_perms.prof");
 
   do {
     auto inputCopy = input;
-    hsort::sort_heavy(inputCopy.begin(), inputCopy.end(), comparator);
-    assert(std::is_sorted(inputCopy.begin(), inputCopy.end(), comparator));
-  } while (std::next_permutation(input.begin(), input.end(), comparator));
+    hsort::sort_heavy(inputCopy.begin(), inputCopy.end(), A::Compare());
+    auto inputc = input;
+    std::sort(inputc.begin(), inputc.end(), A::Compare());
+  } while (std::next_permutation(input.begin(), input.end(), A::Compare()));
+
+  ProfilerStop();
 
   return 0;
 }
