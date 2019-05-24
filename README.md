@@ -32,5 +32,5 @@ sort(indices, cmpi);
 apply(a, indices);
 ```
 we nevertheless doing O(NlogN) swaps inside our `sort` function, but now it swaps intigers. And since `apply` can be done in linear time, only linear number of swaps of values of our expensive-to-move-type is needed.
-You may find this idea implemented in `boost::indirect_sort`.
+You may find this idea implemented in `boost::indirect_*_sort`.
 From my perspective there is a problem with this approach: dynamic memory allocation for `N` integers on every invocation of `sort`.
