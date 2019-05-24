@@ -1,7 +1,5 @@
 #include "../hsort.hpp"
 
-#include <gperftools/profiler.h>
-
 #include <algorithm>
 #include <cassert>
 #include <chrono>

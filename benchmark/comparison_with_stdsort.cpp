@@ -1,4 +1,6 @@
-#include "../hsort.hpp"
+#include "profiling_wrapper.hpp"
+
+#include <hsort.hpp>
 
 #include <gperftools/profiler.h>
 
@@ -42,7 +44,7 @@ int main() {
     input.emplace_back(/*index*/ i, /*key*/ i);
   }
 
-  ProfilerStart("profile_cmp_with_stdsort_all_perms.prof");
+  hsort::PerfProfilingWrapper perf("profile_cmp_with_stdsort_all_perms.prof");
 
   do {
     auto inputCopy = input;
@@ -50,8 +52,6 @@ int main() {
     auto inputc = input;
     std::sort(inputc.begin(), inputc.end(), A::Compare());
   } while (std::next_permutation(input.begin(), input.end(), A::Compare()));
-
-  ProfilerStop();
 
   return 0;
 }

@@ -1,3 +1,5 @@
+#include "profiling_wrapper.hpp"
+
 #include <hsort.hpp>
 
 #include <benchmark/benchmark.h>
@@ -20,16 +22,6 @@
 
 namespace {
 static constexpr std::size_t SIZE = 100;
-
-struct PerfProfilingWrapper {
-  PerfProfilingWrapper(const char* profileName) {
-    ProfilerStart(profileName);
-  }
-
-  ~PerfProfilingWrapper() {
-    ProfilerStop();
-  }
-};
 
 struct X : hsort::hsort_base {
   int key;
@@ -71,7 +63,7 @@ template <class SortAlgo>
 void BM_SortRandomInput(benchmark::State& state,
                         SortAlgo sort,
                         const char* profileName) {
-  PerfProfilingWrapper perf(profileName);
+  hsort::PerfProfilingWrapper perf(profileName);
   const auto input = GetRandomInputContainer(SIZE);
   for (auto _ : state) {
     auto container = input;
