@@ -93,7 +93,6 @@ BENCHMARK_CAPTURE(
 BENCHMARK_CAPTURE(
     BM_SortAllPermutations,
     boost_ifs_tag,
-    boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator,
-    Compare>)
+    boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator, Compare>)
     ->Repetitions(10)
     ->ReportAggregatesOnly();

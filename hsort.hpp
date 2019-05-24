@@ -33,21 +33,20 @@ void apply_order2(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
     auto nextInd = me->index;
     auto meInd = nextInd;
     auto meValue = std::move(*me);
-    if(nextInd != i) {
+    if (nextInd != i) {
       do {
-	auto next = (first + nextInd);
+        auto next = (first + nextInd);
         meInd = nextInd;
-	nextInd = next->index;
-	*me = std::move(*next);
+        nextInd = next->index;
+        *me = std::move(*next);
         me->index = meInd;
         me = next;
-      } while(nextInd != i);
+      } while (nextInd != i);
       *me = std::move(meValue);
       me->index = meInd;
     }
   }
 }
-
 
 template <class SeqRandomIt, class OrdRandomIt>
 void apply_order3(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
@@ -55,13 +54,13 @@ void apply_order3(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
   for (auto i = 0; i < size; ++i) {
     auto me = (first + i);
     auto meValue = *me;
-    if(me->index != i) {
+    if (me->index != i) {
       do {
         auto next = (first + me->index);
         *me = std::move(*next);
         me->index = (me - first);
         me = next;
-      } while(me->index != i);
+      } while (me->index != i);
       *me = std::move(meValue);
       me->index = (me - first);
     }

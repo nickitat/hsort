@@ -2,8 +2,8 @@
 
 #include <gperftools/profiler.h>
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <iterator>
