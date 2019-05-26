@@ -30,30 +30,7 @@ void apply_order2(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
   const auto size = std::distance(ofirst, olast);
   for (auto i = 0; i < size; ++i) {
     auto me = (first + i);
-    auto nextInd = me->index;
-    auto meInd = nextInd;
-    auto meValue = std::move(*me);
-    if (nextInd != i) {
-      do {
-        auto next = (first + nextInd);
-        meInd = nextInd;
-        nextInd = next->index;
-        *me = std::move(*next);
-        me->index = meInd;
-        me = next;
-      } while (nextInd != i);
-      *me = std::move(meValue);
-      me->index = meInd;
-    }
-  }
-}
-
-template <class SeqRandomIt, class OrdRandomIt>
-void apply_order3(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
-  const auto size = std::distance(ofirst, olast);
-  for (auto i = 0; i < size; ++i) {
-    auto me = (first + i);
-    auto meValue = *me;
+    auto me_value = *me;
     if (me->index != i) {
       do {
         auto next = (first + me->index);
@@ -61,8 +38,34 @@ void apply_order3(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
         me->index = (me - first);
         me = next;
       } while (me->index != i);
-      *me = std::move(meValue);
+      *me = std::move(me_value);
       me->index = (me - first);
+    }
+  }
+}
+
+template <class SeqRandomIt, class OrdRandomIt>
+void apply_order3(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
+  const auto size = std::distance(ofirst, olast);
+  auto me = (first);
+  for (auto i = 0; i < size; ++i, ++me) {
+    auto dist_to_me = i;
+    auto me_value = std::move(*me);
+    auto me_index = me_value.index;
+    if (me_index != i) {
+      auto next = (first + me_index);
+      do {
+        *me = std::move(*next);
+        auto tmp = me_index;
+        me_index = me->index;
+        me->index = (dist_to_me);
+        dist_to_me = tmp;
+        me = next;
+        next = (first + me_index);
+      } while (me_index != i);
+      *me = std::move(me_value);
+      me->index = dist_to_me;
+      me = next;
     }
   }
 }
@@ -82,7 +85,7 @@ void sort_heavy(RandomIt first, RandomIt last, Comparator cmp) {
   const auto wlast = detail::wrap(last);
 
   std::sort(wfirst, wlast, comparator);
-  detail::apply_order2(first, wfirst, wlast);
+  detail::apply_order3(first, wfirst, wlast);
 }
 
 }  // namespace hsort
