@@ -11,22 +11,12 @@
 #include <vector>
 
 namespace A {
-// struct X : hsort::hsort_base {
-//   int key;
-//   int data[16];
-
-//   X(std::size_t index, int key) : hsort_base{index}, key(key) {
-//   }
-
-//   friend std::ostream& operator<<(std::ostream& os, const X& x);
-// };
-
 struct Y {
   int key;
   int data[16];
 };
 
-using X = hsort::hsort_base2<Y>;
+using X = hsort::hsort_base<Y>;
 static_assert(std::is_aggregate<X>::value, "");
 
 std::ostream& operator<<(std::ostream& os, const X& x) {
@@ -51,7 +41,7 @@ int main() {
 
   do {
     auto inputCopy = input;
-    hsort::sort_heavy2(inputCopy.begin(), inputCopy.end(), comparator);
+    hsort::sort_heavy(inputCopy.begin(), inputCopy.end(), comparator);
     assert(std::is_sorted(inputCopy.begin(), inputCopy.end(), comparator));
   } while (std::next_permutation(input.begin(), input.end(), comparator));
 

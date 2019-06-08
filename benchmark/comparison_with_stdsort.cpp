@@ -20,7 +20,7 @@ struct Y {
   int data[16];
 };
 
-using X = hsort::hsort_base2<Y>;
+using X = hsort::hsort_base<Y>;
 static_assert(std::is_aggregate<X>::value, "");
 
 struct Compare {
@@ -50,8 +50,6 @@ int main() {
   do {
     auto inputCopy = input;
     hsort::sort_heavy(inputCopy.begin(), inputCopy.end(), A::Compare());
-    auto inputc = input;
-    hsort::sort_heavy2(inputc.begin(), inputc.end(), A::Compare());
     auto inputd = input;
     std::sort(inputd.begin(), inputd.end(), A::Compare());
   } while (std::next_permutation(input.begin(), input.end(), A::Compare()));

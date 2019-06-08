@@ -24,7 +24,7 @@ struct Y {
   int data[16];
 };
 
-using X = hsort::hsort_base2<Y>;
+using X = hsort::hsort_base<Y>;
 static_assert(std::is_aggregate<X>::value, "");
 
 struct Compare {
@@ -64,12 +64,6 @@ BENCHMARK_CAPTURE(BM_SortAllPermutations,
 BENCHMARK_CAPTURE(BM_SortAllPermutations,
                   sort_heavy_tag,
                   hsort::sort_heavy<std::vector<X>::iterator, Compare>)
-    ->Repetitions(10)
-    ->ReportAggregatesOnly();
-
-BENCHMARK_CAPTURE(BM_SortAllPermutations,
-                  sort_heavy_tag2,
-                  hsort::sort_heavy2<std::vector<X>::iterator, Compare>)
     ->Repetitions(10)
     ->ReportAggregatesOnly();
 
