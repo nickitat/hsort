@@ -83,9 +83,9 @@ void apply_order4(SeqRandomIt first, OrdRandomIt ofirst, OrdRandomIt olast) {
       do {
         *me = std::move(*next).value();
         me->index = dist_to_me;
+        me = next;
         dist_to_me = me_index;
         me_index = next->index;
-        me = next;
         next = first + me_index;
       } while (me_index != i);
       *me = std::move(me_value);
