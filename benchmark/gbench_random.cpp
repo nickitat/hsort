@@ -23,13 +23,13 @@
 namespace {
 static constexpr std::size_t SIZE = 100;
 
-struct X : hsort::hsort_base {
+struct Y {
   int key;
   int data[16];
-
-  X(std::size_t index, int key) : hsort_base{index}, key(key) {
-  }
 };
+
+using X = hsort::hsort_base2<Y>;
+static_assert(std::is_aggregate<X>::value, "");
 
 struct Compare {
   bool operator()(const X& lhs, const X& rhs) const {
@@ -45,8 +45,11 @@ void ShuffleContainer(std::vector<X>& container) {
 
 std::vector<X> PrepareRandomInputContainer(std::size_t size) {
   std::vector<X> input;
-  for (std::size_t i = 0; i < size; ++i) {
-    input.emplace_back(i /*index*/, i /*key*/);
+  for (std::size_t i = 0; i < SIZE; ++i) {
+    X x;
+    x.key = i;
+    x.index = i;
+    input.emplace_back(std::move(x));
   }
   ShuffleContainer(input);
   return input;
@@ -83,6 +86,11 @@ BENCHMARK_CAPTURE(BM_SortRandomInput,
                   sort_heavy_tag,
                   hsort::sort_heavy<std::vector<X>::iterator, Compare>,
                   "profiles/random/profile_sort_heavy.prof");
+
+BENCHMARK_CAPTURE(BM_SortRandomInput,
+                  sort_heavy_tag2,
+                  hsort::sort_heavy2<std::vector<X>::iterator, Compare>,
+                  "profiles/random/profile_sort_heavy2.prof");
 
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   boost_pdq_tag,

@@ -15,15 +15,13 @@
 #include <vector>
 
 namespace A {
-struct X : hsort::hsort_base {
+struct Y {
   int key;
   int data[16];
-
-  X(std::size_t index, int key) : hsort_base{index}, key(key) {
-  }
-
-  friend std::ostream& operator<<(std::ostream& os, const X& x);
 };
+
+using X = hsort::hsort_base2<Y>;
+static_assert(std::is_aggregate<X>::value, "");
 
 struct Compare {
   bool operator()(const X& lhs, const X& rhs) const {
@@ -41,7 +39,10 @@ int main() {
   static constexpr std::size_t size = 10;
   std::vector<A::X> input;
   for (std::size_t i = 0; i < size; ++i) {
-    input.emplace_back(/*index*/ i, /*key*/ i);
+    A::X x;
+    x.key = i;
+    x.index = i;
+    input.emplace_back(std::move(x));
   }
 
   hsort::PerfProfilingWrapper perf("profile_cmp_with_stdsort_all_perms.prof");
@@ -50,7 +51,9 @@ int main() {
     auto inputCopy = input;
     hsort::sort_heavy(inputCopy.begin(), inputCopy.end(), A::Compare());
     auto inputc = input;
-    std::sort(inputc.begin(), inputc.end(), A::Compare());
+    hsort::sort_heavy2(inputc.begin(), inputc.end(), A::Compare());
+    auto inputd = input;
+    std::sort(inputd.begin(), inputd.end(), A::Compare());
   } while (std::next_permutation(input.begin(), input.end(), A::Compare()));
 
   return 0;

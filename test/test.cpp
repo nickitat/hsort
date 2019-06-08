@@ -11,15 +11,23 @@
 #include <vector>
 
 namespace A {
-struct X : hsort::hsort_base {
+// struct X : hsort::hsort_base {
+//   int key;
+//   int data[16];
+
+//   X(std::size_t index, int key) : hsort_base{index}, key(key) {
+//   }
+
+//   friend std::ostream& operator<<(std::ostream& os, const X& x);
+// };
+
+struct Y {
   int key;
   int data[16];
-
-  X(std::size_t index, int key) : hsort_base{index}, key(key) {
-  }
-
-  friend std::ostream& operator<<(std::ostream& os, const X& x);
 };
+
+using X = hsort::hsort_base2<Y>;
+static_assert(std::is_aggregate<X>::value, "");
 
 std::ostream& operator<<(std::ostream& os, const X& x) {
   os << x.key;
@@ -30,8 +38,11 @@ std::ostream& operator<<(std::ostream& os, const X& x) {
 int main() {
   static constexpr std::size_t size = 9;
   std::vector<A::X> input;
-  for (std::size_t i = 0; i < size; ++i) {
-    input.emplace_back(/*index*/ i, /*key*/ i);
+  for (int i = 0; i < size; ++i) {
+    A::X x;
+    x.key = i;
+    x.index = i;
+    input.push_back(std::move(x));
   }
 
   auto comparator = [](const A::X& lhs, const A::X& rhs) {
@@ -40,7 +51,7 @@ int main() {
 
   do {
     auto inputCopy = input;
-    hsort::sort_heavy(inputCopy.begin(), inputCopy.end(), comparator);
+    hsort::sort_heavy2(inputCopy.begin(), inputCopy.end(), comparator);
     assert(std::is_sorted(inputCopy.begin(), inputCopy.end(), comparator));
   } while (std::next_permutation(input.begin(), input.end(), comparator));
 

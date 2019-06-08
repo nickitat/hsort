@@ -19,13 +19,13 @@
 namespace {
 static constexpr std::size_t SIZE = 9;
 
-struct X : hsort::hsort_base {
+struct Y {
   int key;
   int data[16];
-
-  X(std::size_t index, int key) : hsort_base{index}, key(key) {
-  }
 };
+
+using X = hsort::hsort_base2<Y>;
+static_assert(std::is_aggregate<X>::value, "");
 
 struct Compare {
   bool operator()(const X& lhs, const X& rhs) const {
@@ -39,7 +39,10 @@ void BM_SortAllPermutations(benchmark::State& state, SortAlgo sort) {
   for (auto _ : state) {
     std::vector<X> input;
     for (std::size_t i = 0; i < SIZE; ++i) {
-      input.emplace_back(/*index*/ i, /*key*/ i);
+      X x;
+      x.key = i;
+      x.index = i;
+      input.emplace_back(std::move(x));
     }
 
     do {
@@ -61,6 +64,12 @@ BENCHMARK_CAPTURE(BM_SortAllPermutations,
 BENCHMARK_CAPTURE(BM_SortAllPermutations,
                   sort_heavy_tag,
                   hsort::sort_heavy<std::vector<X>::iterator, Compare>)
+    ->Repetitions(10)
+    ->ReportAggregatesOnly();
+
+BENCHMARK_CAPTURE(BM_SortAllPermutations,
+                  sort_heavy_tag2,
+                  hsort::sort_heavy2<std::vector<X>::iterator, Compare>)
     ->Repetitions(10)
     ->ReportAggregatesOnly();
 
