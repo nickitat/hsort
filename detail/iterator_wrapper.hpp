@@ -32,7 +32,7 @@ class iter_wrapper {
     return *this;
   }
 
-  iter_wrapper operator--(int) const {
+  iter_wrapper operator--(int) {
     return iter_wrapper{m_it--};
   }
 
@@ -41,7 +41,7 @@ class iter_wrapper {
     return *this;
   }
 
-  iter_wrapper operator++(int) const {
+  iter_wrapper operator++(int) {
     return iter_wrapper{m_it++};
   }
 
