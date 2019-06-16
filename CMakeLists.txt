@@ -19,7 +19,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
   set(additional_libs ${additional_libs} pthread)
 endif()
 
-set(additional_compiler_flags -std=c++17 -g -O2)
+set(additional_compiler_flags -std=c++17 -g -O2 -fno-omit-frame-pointer -fno-rtti -fno-exceptions)
 
 if(NICKITAT_HSORT_WITH_TESTS)
   add_executable(nickitat_hsort_tests test/test.cpp)
