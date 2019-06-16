@@ -74,43 +74,45 @@ void BM_SortRandomInput(benchmark::State& state,
   }
 }
 
+#define InstantiationOptions ReportAggregatesOnly()
+
 void (*fp)(std::vector<X>::iterator,
            std::vector<X>::iterator,
            Compare) = &std::sort;
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   std_sort_tag,
                   (decltype(*fp))std::sort<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_stdsort.prof");
+                  "profiles/random/profile_stdsort.prof")->InstantiationOptions;
 
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   sort_heavy_tag,
                   hsort::sort_heavy<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_sort_heavy.prof");
+                  "profiles/random/profile_sort_heavy.prof")->InstantiationOptions;
 
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   boost_pdq_tag,
                   boost::sort::pdqsort<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_boost_pdq.prof");
+                  "profiles/random/profile_boost_pdq.prof")->InstantiationOptions;
 
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   boost_spin_tag,
                   boost::sort::spinsort<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_boost_spin.prof");
+                  "profiles/random/profile_boost_spin.prof")->InstantiationOptions;
 
 BENCHMARK_CAPTURE(
     BM_SortRandomInput,
     boost_iss_tag,
     boost::sort::indirect_spinsort<std::vector<X>::iterator, Compare>,
-    "profiles/random/profile_boost_iss.prof");
+    "profiles/random/profile_boost_iss.prof")->InstantiationOptions;
 
 BENCHMARK_CAPTURE(
     BM_SortRandomInput,
     boost_flat_tag,
     boost::sort::flat_stable_sort<std::vector<X>::iterator, Compare>,
-    "profiles/random/profile_boost_flat.prof");
+    "profiles/random/profile_boost_flat.prof")->InstantiationOptions;
 
 BENCHMARK_CAPTURE(
     BM_SortRandomInput,
     boost_ifs_tag,
     boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator, Compare>,
-    "profiles/random/profile_boost_ifs.prof");
+    "profiles/random/profile_boost_ifs.prof")->InstantiationOptions;
