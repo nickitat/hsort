@@ -25,7 +25,10 @@ struct Y {
 };
 
 using X = hsort::hsort_base<Y>;
+
+#if __cplusplus >= 201703L
 static_assert(std::is_aggregate<X>::value, "");
+#endif
 
 struct Compare {
   bool operator()(const X& lhs, const X& rhs) const {

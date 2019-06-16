@@ -17,7 +17,10 @@ struct Y {
 };
 
 using X = hsort::hsort_base<Y>;
+
+#if __cplusplus >= 201703L
 static_assert(std::is_aggregate<X>::value, "");
+#endif
 
 std::ostream& operator<<(std::ostream& os, const X& x) {
   os << x.key;
