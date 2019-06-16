@@ -66,7 +66,7 @@ template <class SortAlgo>
 void BM_SortRandomInput(benchmark::State& state,
                         SortAlgo sort,
                         const char* profileName) {
-  hsort::PerfProfilingWrapper perf(profileName);
+  // hsort::PerfProfilingWrapper perf(profileName);
   const auto input = GetRandomInputContainer(SIZE);
   auto container = input;
   for (auto _ : state) {
