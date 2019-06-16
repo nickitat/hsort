@@ -68,8 +68,9 @@ void BM_SortRandomInput(benchmark::State& state,
                         const char* profileName) {
   hsort::PerfProfilingWrapper perf(profileName);
   const auto input = GetRandomInputContainer(SIZE);
+  auto container = input;
   for (auto _ : state) {
-    auto container = input;
+    std::copy(input.begin(), input.end(), container.begin());
     sort(container.begin(), container.end(), Compare());
   }
 }
