@@ -9,6 +9,7 @@ script:
       -DNICKITAT_HSORT_WITH_TESTS=1
   - cmake --build build
   - ./build/nickitat_hsort_tests
+  - cppcheck ./build --force --quiet --error-exitcode=1
 
 after_success:
   - codecov
@@ -55,3 +56,4 @@ before_install:
 
 install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then travis_wait 60 brew install gcc@7 ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cppcheck ; else sudo apt-get install -qq cppcheck ; fi
