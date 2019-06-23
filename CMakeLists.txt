@@ -23,7 +23,7 @@ set(additional_compiler_flags -std=c++11 -g -O2 -fno-omit-frame-pointer -fno-rtt
 
 if(NICKITAT_HSORT_WITH_TESTS)
   add_executable(nickitat_hsort_tests test/test.cpp)
-  target_link_libraries(nickitat_hsort_tests nickitat_hsort ${additional_libs})
+  target_link_libraries(nickitat_hsort_tests nickitat_hsort)
   target_compile_options(nickitat_hsort_tests
                          PRIVATE ${additional_compiler_flags})
 
