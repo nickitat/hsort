@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/nickitat/hsort.svg?branch=master)](https://travis-ci.com/nickitat/hsort)
+
 ## The problem
 
 It is well known that all broadly used comparison-based sorting algorithms performs O(NlogN) comparisons and, consequently, O(NlogN) swaps in order to sort an array of N elements. Also known that there exist types which are expensive to swap (because copying them is roughly the same amount of operations as moving them). Consider some good old POD types we are all using as protocols structures:
