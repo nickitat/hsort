@@ -64,11 +64,11 @@ class iter_wrapper {
   }
 
   value_type& operator*() {
-    return m_it->index;
+    return m_it->__hsort_index;
   }
 
   const value_type& operator*() const {
-    return m_it->index;
+    return m_it->__hsort_index;
   }
 
   //  private:

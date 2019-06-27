@@ -48,11 +48,9 @@ void ShuffleContainer(std::vector<X>& container) {
 
 std::vector<X> PrepareRandomInputContainer(std::size_t size) {
   std::vector<X> input;
-  for (std::size_t i = 0; i < SIZE; ++i) {
-    X x;
-    x.key = i;
-    x.index = i;
-    input.emplace_back(std::move(x));
+  for (size_t i = 0; i < SIZE; ++i) {
+    X x{static_cast<int>(i), {}, i};
+    input.push_back(std::move(x));
   }
   ShuffleContainer(input);
   return input;
@@ -86,37 +84,44 @@ void (*fp)(std::vector<X>::iterator,
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   std_sort_tag,
                   (decltype(*fp))std::sort<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_stdsort.prof")->InstantiationOptions;
+                  "profiles/random/profile_stdsort.prof")
+    ->InstantiationOptions;
 
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   sort_heavy_tag,
                   hsort::sort_heavy<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_sort_heavy.prof")->InstantiationOptions;
+                  "profiles/random/profile_sort_heavy.prof")
+    ->InstantiationOptions;
 
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   boost_pdq_tag,
                   boost::sort::pdqsort<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_boost_pdq.prof")->InstantiationOptions;
+                  "profiles/random/profile_boost_pdq.prof")
+    ->InstantiationOptions;
 
 BENCHMARK_CAPTURE(BM_SortRandomInput,
                   boost_spin_tag,
                   boost::sort::spinsort<std::vector<X>::iterator, Compare>,
-                  "profiles/random/profile_boost_spin.prof")->InstantiationOptions;
+                  "profiles/random/profile_boost_spin.prof")
+    ->InstantiationOptions;
 
 BENCHMARK_CAPTURE(
     BM_SortRandomInput,
     boost_iss_tag,
     boost::sort::indirect_spinsort<std::vector<X>::iterator, Compare>,
-    "profiles/random/profile_boost_iss.prof")->InstantiationOptions;
+    "profiles/random/profile_boost_iss.prof")
+    ->InstantiationOptions;
 
 BENCHMARK_CAPTURE(
     BM_SortRandomInput,
     boost_flat_tag,
     boost::sort::flat_stable_sort<std::vector<X>::iterator, Compare>,
-    "profiles/random/profile_boost_flat.prof")->InstantiationOptions;
+    "profiles/random/profile_boost_flat.prof")
+    ->InstantiationOptions;
 
 BENCHMARK_CAPTURE(
     BM_SortRandomInput,
     boost_ifs_tag,
     boost::sort::indirect_flat_stable_sort<std::vector<X>::iterator, Compare>,
-    "profiles/random/profile_boost_ifs.prof")->InstantiationOptions;
+    "profiles/random/profile_boost_ifs.prof")
+    ->InstantiationOptions;

@@ -31,10 +31,8 @@ std::ostream& operator<<(std::ostream& os, const X& x) {
 int main() {
   static constexpr std::size_t size = 9;
   std::vector<A::X> input;
-  for (int i = 0; i < size; ++i) {
-    A::X x;
-    x.key = i;
-    x.index = i;
+  for (size_t i = 0; i < size; ++i) {
+    A::X x{static_cast<int>(i), {}, i};
     input.push_back(std::move(x));
   }
 

@@ -17,19 +17,19 @@ void apply_order(SeqRandomIt first, SeqRandomIt last) {
   for (auto i = 0; i < size; ++i, ++me) {
     auto dist_to_me = i;
     auto me_value{std::move(*me).value()};
-    auto me_index = me->index;
+    auto me_index = me->__hsort_index;
     auto next = (first + me_index);
     if (me_index != i) {
       do {
         *me = std::move(*next).value();
-        me->index = dist_to_me;
+        me->__hsort_index = dist_to_me;
         dist_to_me = me_index;
-        me_index = next->index;
+        me_index = next->__hsort_index;
         me = next;
         next = first + me_index;
       } while (me_index != i);
       *me = std::move(me_value);
-      me->index = dist_to_me;
+      me->__hsort_index = dist_to_me;
       me = next;
     }
   }
@@ -38,7 +38,7 @@ void apply_order(SeqRandomIt first, SeqRandomIt last) {
 }  // namespace detail
 
 template <class SourceType>
-struct hsort_base : SourceType {
+class hsort_base : public SourceType {
   SourceType&& value() && {
     return static_cast<SourceType&&>(*this);
   }
@@ -47,7 +47,11 @@ struct hsort_base : SourceType {
     static_cast<SourceType&>(*this) = std::move(oth);
   }
 
-  std::size_t index;
+  template <class SeqRandomIt>
+  friend void detail::apply_order(SeqRandomIt, SeqRandomIt);
+
+ public:
+  std::size_t __hsort_index;
 };
 
 template <class RandomIt, class Comparator>

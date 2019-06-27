@@ -41,11 +41,9 @@ template <class SortAlgo>
 void BM_SortAllPermutations(benchmark::State& state, SortAlgo sort) {
   for (auto _ : state) {
     std::vector<X> input;
-    for (std::size_t i = 0; i < SIZE; ++i) {
-      X x;
-      x.key = i;
-      x.index = i;
-      input.emplace_back(std::move(x));
+    for (size_t i = 0; i < SIZE; ++i) {
+      X x{static_cast<int>(i), {}, i};
+      input.push_back(std::move(x));
     }
 
     do {
