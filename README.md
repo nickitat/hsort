@@ -2,9 +2,9 @@
 
 ## The problem
 
-It is well known that all broadly used comparison-based sorting algorithms performs O(NlogN) comparisons and, consequently, O(NlogN) swaps in order to sort an array of N elements.
+It is known that the all broadly used comparison-based sorting algorithms perform O(NlogN) comparisons and, consequently, O(NlogN) swaps in order to sort an array of N elements.
 Also known that there are types which are expensive to swap (because copying them is roughly the same amount of operations as moving them).
-Consider some good old POD type we are all using as protocols structures:
+Consider some good old POD-type we are all using as protocols structure:
 
 ```cpp
 struct Message {
@@ -38,16 +38,16 @@ cmp_ind = [&](int i, int j) { return cmp(a[i], a[j]); };
 sort(indices, cmp_ind);
 apply(indices, a);
 ```
-we nevertheless doing O(NlogN) swaps during our `sort`, but now it swaps intigers.
+we still doing O(NlogN) swaps during `sort`, but now we are swaping intigers.
 And since `apply` can be done in linear time, only linear number of swaps of values of our expensive-to-move-type are needed.
-You may find this idea implemented in `boost::indirect_*_sort` (except `boost`'s implementation uses pointers).
-From my perspective, there is a problem with this approach: dynamic memory allocation for `N` integers on every invocation of `sort`.
+You may find this idea implemented in `boost::indirect_*_sort` (except that `boost`'s implementation uses pointers).
+But this approach has a drawback: dynamic memory allocation for `N` integers on every invocation of `sort`.
 
 ## The approach
 
 It is proposed to instantiate class template `hsort::hsort_base` with your class as a template argument.
 Effectively it inherits from your type and extends it with the `std::size_t index;` member.
-This way, we allocate only once during the object creation and you will be paying this 8-byte cost for the entire lifetime of your data.
+This way, we allocate only once during the object creation and you will be paying this 8-byte cost for the whole lifetime of your data.
 But in exchange you get slightly faster sorting.
 
 ## Sample benchmarks
@@ -61,26 +61,36 @@ struct Y {
 ```
 with keys from [0; 100)
 
+
+Run on (1 X 2000.16 MHz CPU )<br/>
+CPU Caches:<br/>
+  L1 Data 32K (x1)<br/>
+  L1 Instruction 32K (x1)<br/>
+  L2 Unified 256K (x1)<br/>
+  L3 Unified 56320K (x1)<br/>
+Load Average: 0.81, 0.52, 0.23<br/>
+
+
 **Benchmark**|**Time**|**CPU**|**Iterations**
 :-----:|:-----:|:-----:|:-----:
-BM\_SortRandomInput/std\_sort\_tag\_mean|5323 ns|5320 ns|100
-**BM\_SortRandomInput/std\_sort\_tag\_median**|5122 ns|5117 ns|100
-BM\_SortRandomInput/std\_sort\_tag\_stddev|359 ns|359 ns|100
-BM\_SortRandomInput/sort\_heavy\_tag\_mean|4621 ns|4619 ns|100
-**BM\_SortRandomInput/sort\_heavy\_tag\_median**|4441 ns|4440 ns|100
-BM\_SortRandomInput/sort\_heavy\_tag\_stddev|280 ns|279 ns|100
-BM\_SortRandomInput/boost\_pdq\_tag\_mean|4942 ns|4940 ns|100
-**BM\_SortRandomInput/boost\_pdq\_tag\_median**|4949 ns|4948 ns|100
-BM\_SortRandomInput/boost\_pdq\_tag\_stddev|91.4 ns|91.8 ns|100
-BM\_SortRandomInput/boost\_spin\_tag\_mean|5797 ns|5793 ns|100
-**BM\_SortRandomInput/boost\_spin\_tag\_median**|5788 ns|5787 ns|100
-BM\_SortRandomInput/boost\_spin\_tag\_stddev|168 ns|165 ns|100
-BM\_SortRandomInput/boost\_iss\_tag\_mean|5322 ns|5319 ns|100
-**BM\_SortRandomInput/boost\_iss\_tag\_median**|5294 ns|5291 ns|100
-BM\_SortRandomInput/boost\_iss\_tag\_stddev|97.1 ns|95.2 ns|100
-BM\_SortRandomInput/boost\_flat\_tag\_mean|5629 ns|5625 ns|100
-**BM\_SortRandomInput/boost\_flat\_tag\_median**|5688 ns|5687 ns|100
-BM\_SortRandomInput/boost\_flat\_tag\_stddev|270 ns|271 ns|100
-BM\_SortRandomInput/boost\_ifs\_tag\_mean|7684 ns|7679 ns|100
-**BM\_SortRandomInput/boost\_ifs\_tag\_median**|7802 ns|7797 ns|100
-BM\_SortRandomInput/boost\_ifs\_tag\_stddev|231 ns|229 ns|100
+BM\_SortRandomInput/std\_sort\_tag\_mean|5275 ns|5273 ns|10
+**BM\_SortRandomInput/std\_sort\_tag\_median**|5302 ns|5298 ns|10
+BM\_SortRandomInput/std\_sort\_tag\_stddev|117 ns|116 ns|10
+BM\_SortRandomInput/sort\_heavy\_tag\_mean|4584 ns|4583 ns|10
+**BM\_SortRandomInput/sort\_heavy\_tag\_median**|4650 ns|4648 ns|10
+BM\_SortRandomInput/sort\_heavy\_tag\_stddev|277 ns|277 ns|10
+BM\_SortRandomInput/boost\_pdq\_tag\_mean|4993 ns|4991 ns|10
+**BM\_SortRandomInput/boost\_pdq\_tag\_median**|4969 ns|4967 ns|10
+BM\_SortRandomInput/boost\_pdq\_tag\_stddev|223 ns|223 ns|10
+BM\_SortRandomInput/boost\_spin\_tag\_mean|5725 ns|5723 ns|10
+**BM\_SortRandomInput/boost\_spin\_tag\_median**|5506 ns|5504 ns|10
+BM\_SortRandomInput/boost\_spin\_tag\_stddev|343 ns|343 ns|10
+BM\_SortRandomInput/boost\_iss\_tag\_mean|5541 ns|5540 ns|10
+**BM\_SortRandomInput/boost\_iss\_tag\_median**|5466 ns|5464 ns|10
+BM\_SortRandomInput/boost\_iss\_tag\_stddev|220 ns|220 ns|10
+BM\_SortRandomInput/boost\_flat\_tag\_mean|5606 ns|5596 ns|10
+**BM\_SortRandomInput/boost\_flat\_tag\_median**|5583 ns|5575 ns|10
+BM\_SortRandomInput/boost\_flat\_tag\_stddev|167 ns|171 ns|10
+BM\_SortRandomInput/boost\_ifs\_tag\_mean|7617 ns|7614 ns|10
+**BM\_SortRandomInput/boost\_ifs\_tag\_median**|7600 ns|7597 ns|10
+BM\_SortRandomInput/boost\_ifs\_tag\_stddev|259 ns|258 ns|10
