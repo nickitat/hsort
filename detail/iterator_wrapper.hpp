@@ -8,15 +8,15 @@ namespace hsort {
 
 namespace detail {
 
-template <class _RandomIt>
+template <class RandomIt>
 class iter_wrapper {
  public:
-  using iterator_category = std::random_access_iterator_tag;
-  using value_type = std::size_t;
   using difference_type =
-      typename std::iterator_traits<_RandomIt>::difference_type;
-  using pointer = typename std::iterator_traits<_RandomIt>::pointer;
-  using reference = typename std::iterator_traits<_RandomIt>::reference;
+      typename std::iterator_traits<RandomIt>::difference_type;
+  using iterator_category = std::random_access_iterator_tag;
+  using pointer = typename std::iterator_traits<RandomIt>::pointer;
+  using reference = typename std::iterator_traits<RandomIt>::reference;
+  using value_type = typename RandomIt::value_type::index_type;
 
   static_assert(
       std::is_same<
@@ -24,7 +24,7 @@ class iter_wrapper {
           std::random_access_iterator_tag>::value,
       "iter_wrapper should be a random access iterator.");
 
-  explicit iter_wrapper(_RandomIt it) : m_it(it) {
+  explicit iter_wrapper(RandomIt it) : m_it(it) {
   }
 
   iter_wrapper& operator--() {
@@ -64,15 +64,15 @@ class iter_wrapper {
   }
 
   value_type& operator*() {
-    return m_it->__hsort_index;
+    return m_it->index;
   }
 
   const value_type& operator*() const {
-    return m_it->__hsort_index;
+    return m_it->index;
   }
 
-//  private:
-  _RandomIt m_it;
+  //  private:
+  RandomIt m_it;
 };
 
 template <class It>
