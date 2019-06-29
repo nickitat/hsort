@@ -4,19 +4,19 @@ dist: trusty
 
 script:
   # install google benchmark
-  - mkdir tmp && cd tmp
-  - git clone https://github.com/google/benchmark.git
-  - mkdir build_gb && cd build_gb
-  - cmake -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON ../benchmark
-  - make
-  - sudo make install
-  - cd ../../
+  #- mkdir tmp && cd tmp
+  #- git clone https://github.com/google/benchmark.git
+  #- mkdir build_gb && cd build_gb
+  #- cmake -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON ../benchmark
+  #- make
+  #- sudo make install
+  #- cd ../../
   # build project
   - cmake .
       -Bbuild
       -DCMAKE_CXX_COMPILER=${CXX}
       -DNICKITAT_HSORT_WITH_TESTS=1
-      -DNICKITAT_HSORT_WITH_BENCHMARKS=1
+      #-DNICKITAT_HSORT_WITH_BENCHMARKS=1
   - cmake --build build
   - ./build/nickitat_hsort_tests
   - cppcheck ./build --force --quiet --error-exitcode=1
@@ -67,5 +67,5 @@ before_install:
 install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then travis_wait 60 brew install gcc@7 ; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cppcheck ; else sudo apt-get install -qq cppcheck ; fi
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cppcheck ; else sudo apt-get install google-perftools libgoogle-perftools-dev ; fi
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cppcheck ; else sudo apt-get install libboost-all-dev ; fi
+    #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cppcheck ; else sudo apt-get install google-perftools libgoogle-perftools-dev ; fi
+    #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cppcheck ; else sudo apt-get install libboost-all-dev ; fi
