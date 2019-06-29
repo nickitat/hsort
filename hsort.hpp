@@ -1,41 +1,12 @@
 #pragma once
 
+#include <detail/apply_order.hpp>
 #include <detail/iterator_wrapper.hpp>
 
 #include <algorithm>
 #include <cstddef>
-#include <iostream>
 
 namespace hsort {
-
-namespace detail {
-
-template <class SeqRandomIt>
-void apply_order(SeqRandomIt first, SeqRandomIt last) {
-  const auto size = std::distance(first, last);
-  auto me = first;
-  for (auto i = 0; i < size; ++i, ++me) {
-    auto dist_to_me = i;
-    auto me_value{std::move(*me).value()};
-    auto me_index = me->__hsort_index;
-    auto next = (first + me_index);
-    if (me_index != i) {
-      do {
-        *me = std::move(*next).value();
-        me->__hsort_index = dist_to_me;
-        dist_to_me = me_index;
-        me_index = next->__hsort_index;
-        me = next;
-        next = first + me_index;
-      } while (me_index != i);
-      *me = std::move(me_value);
-      me->__hsort_index = dist_to_me;
-      me = next;
-    }
-  }
-}
-
-}  // namespace detail
 
 template <class SourceType>
 class hsort_base : public SourceType {

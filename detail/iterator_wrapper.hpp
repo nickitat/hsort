@@ -71,13 +71,13 @@ class iter_wrapper {
     return m_it->__hsort_index;
   }
 
-  //  private:
+//  private:
   _RandomIt m_it;
 };
 
 template <class It>
-typename It::difference_type operator-(const iter_wrapper<It>& lhs,
-                                       const iter_wrapper<It>& rhs) {
+auto operator-(const iter_wrapper<It>& lhs, const iter_wrapper<It>& rhs)
+    -> decltype(lhs.m_it - rhs.m_it) {
   return lhs.m_it - rhs.m_it;
 }
 
