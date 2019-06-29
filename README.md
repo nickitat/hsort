@@ -50,7 +50,7 @@ Effectively it inherits from your type and extends it with the `std::size_t inde
 This way, we allocate only once during the object creation and you will be paying this 8-byte cost for the whole lifetime of your data.
 But in exchange you get slightly faster sorting.
 
-## Sample benchmarks
+## Benchmarks
 
 Input: 100 randomly shuffled instances of type `hsort::hsort_base<Y>`, where
 ```cpp
